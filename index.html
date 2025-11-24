@@ -47,6 +47,31 @@
             font-size: 1.2em;
             max-width: 600px;
             line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .button-container {
+            margin-top: 30px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        .btn:active {
+            transform: translateY(-1px);
         }
         @keyframes moveBackground {
             0% {
@@ -64,6 +89,10 @@
         <h1>GraphXpert</h1>
         <p>Sito in costruzione</p>
         <p>Stiamo lavorando per migliorare il nostro sito. Presto saremo online.</p>
+        
+        <div class="button-container">
+            <a href="/assembly-check-site/" class="btn">🔧 Vai ad Assembly Check</a>
+        </div>
     </div>
 </body>
 </html>
