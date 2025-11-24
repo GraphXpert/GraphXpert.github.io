@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex,nofollow">
+    <title>Assembly Check Web - Quality Check</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔍</text></svg>'>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🔍 Assembly Check Web</h1>
+            <p>Quality check comparing PDF ↔ Excel</p>
+        </header>
+
+        <main class="content">
+            <!-- Upload Excel (now on top) -->
+            <div class="upload-section">
+                <div class="drop-zone" id="excel-drop-zone">
+                    <div class="upload-icon">📊</div>
+                    <h3>Drag & drop Excel file</h3>
+                    <p>Or click to select</p>
+                    <input type="file" id="excel-input" accept=".xlsx,.xls" class="file-input">
+                </div>
+                <div class="file-info" id="excel-info"></div>
+                <div class="params-row">
+                    <div class="param">
+                        <label for="colonne-marche">Marks Column</label>
+                        <input type="text" id="colonne-marche" value="B" maxlength="2">
+                    </div>
+                    <div class="param">
+                        <label for="colonne-quantita">Quantity Column</label>
+                        <input type="text" id="colonne-quantita" value="C" maxlength="2">
+                    </div>
+                    <div class="param">
+                        <label for="riga-partenza">Start Row</label>
+                        <input type="number" id="riga-partenza" value="19" min="1">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload PDF (now below) -->
+            <div class="upload-section">
+                <div class="drop-zone" id="pdf-drop-zone">
+                    <div class="upload-icon">📄</div>
+                    <h3>Drag & drop PDF file</h3>
+                    <p>Or click to select</p>
+                    <input type="file" id="pdf-input" accept=".pdf" class="file-input" multiple>
+                </div>
+                <div class="file-info" id="pdf-info"></div>
+            </div>
+
+            <!-- Bottone Generazione -->
+            <div class="generate-section">
+                <button id="generate-report" class="generate-btn" disabled>
+                    🚀 Generate Report
+                </button>
+                <div class="status" id="status"></div>
+            </div>
+
+            <!-- Area Risultati -->
+            <div class="results-section" id="results-section" style="display: none;">
+                <div class="results-header">
+                    <h3>📊 Comparison Results</h3>
+                    <button id="download-report" class="download-btn">💾 Download PDF</button>
+                </div>
+                <div class="results-content" id="results-content"></div>
+            </div>
+        </main>
+
+        <footer class="footer">
+            <p>Assembly Check Web App - Runs directly in the browser</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+    <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
