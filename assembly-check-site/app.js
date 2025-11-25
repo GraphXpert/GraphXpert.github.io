@@ -10,6 +10,20 @@ class AssemblyCheckApp {
         this.initializeEventListeners();
     }
 
+    /**
+     * Divide array di PDF in chunks più piccoli
+     * @param {Array} array - Array da dividere
+     * @param {number} chunkSize - Dimensione di ogni chunk (default: 10)
+     * @returns {Array} Array di chunks
+     */
+    chunkArray(array, chunkSize = 10) {
+        const chunks = [];
+        for (let i = 0; i < array.length; i += chunkSize) {
+            chunks.push(array.slice(i, i + chunkSize));
+        }
+        return chunks;
+    }
+
     initializeEventListeners() {
         const pdfDropZone = document.getElementById('pdf-drop-zone');
         const pdfInput = document.getElementById('pdf-input');
@@ -102,38 +116,86 @@ class AssemblyCheckApp {
         
         try {
             processButton.disabled = true;
-            processButton.textContent = 'Processing on server...';
+            processButton.textContent = 'Processing...';
             resultsSection.style.display = 'block';
-            resultsDiv.innerHTML = '<div class="processing-message">🔄 Analyzing files on server...</div>';
 
+            // Prepara config
             const config = {
                 colMarks: (document.getElementById('colonne-marche')?.value || 'B').toUpperCase(),
                 colQty: (document.getElementById('colonne-quantita')?.value || 'C').toUpperCase(),
                 startRow: parseInt(document.getElementById('riga-partenza')?.value || '1', 10)
             };
 
-            const response = await fetch('https://graphxpert-backend-x6r2.vercel.app/api/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    pdfFiles: this.pdfFilesBase64,
-                    excelFile: this.excelFileBase64,
-                    config: config
-                })
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({}));
-                throw new Error(errorData.error || `API error: ${response.status}`);
-            }
-
-            const apiResponse = await response.json();
+            // *** CHUNKING: Dividi PDF in gruppi da 10 ***
+            const pdfChunks = this.chunkArray(this.pdfFilesBase64, 10);
+            const totalChunks = pdfChunks.length;
             
-            if (!apiResponse.success) {
-                throw new Error(apiResponse.error || 'Analysis failed');
+            resultsDiv.innerHTML = `
+                <div class="processing-message">
+                    🔄 Processing ${this.pdfFilesBase64.length} PDFs in ${totalChunks} batch${totalChunks > 1 ? 'es' : ''}...
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-text">Batch 0 of ${totalChunks}</div>
+                </div>
+            `;
+
+            // Array per raccogliere tutti i risultati
+            let allResults = {
+                pdfFreq: {},
+                excelFreq: {},
+                excelData: [],
+                matches: [],
+                pdfOnly: [],
+                excelOnly: [],
+                quantityCorrect: [],
+                quantityMissing: [],
+                quantityExtra: [],
+                totalPdfCodes: 0,
+                totalExcelCodes: 0,
+                pdfFilesProcessed: 0,
+                excelRowsProcessed: 0
+            };
+
+            // *** PROCESSA OGNI CHUNK ***
+            for (let i = 0; i < pdfChunks.length; i++) {
+                const chunk = pdfChunks[i];
+                
+                // Update progress
+                const progress = ((i + 1) / totalChunks) * 100;
+                document.querySelector('.progress-fill').style.width = `${progress}%`;
+                document.querySelector('.progress-text').textContent = 
+                    `Batch ${i + 1} of ${totalChunks} (${chunk.length} PDF${chunk.length > 1 ? 's' : ''})`;
+
+                // Chiamata API per questo chunk
+                const response = await fetch('https://graphxpert-backend-x6r2.vercel.app/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        pdfFiles: chunk,
+                        excelFile: this.excelFileBase64,
+                        config: config
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({}));
+                    throw new Error(`Batch ${i + 1} failed: ${errorData.error || response.status}`);
+                }
+
+                const apiResponse = await response.json();
+                
+                if (!apiResponse.success) {
+                    throw new Error(`Batch ${i + 1}: ${apiResponse.error}`);
+                }
+
+                // *** MERGE RISULTATI ***
+                this.mergeResults(allResults, apiResponse.results);
             }
 
-            this.results = apiResponse.results;
+            // *** FINALIZZA RISULTATI ***
+            this.finalizeResults(allResults);
+            this.results = allResults;
             this.displayResults();
             
         } catch (error) {
@@ -143,6 +205,80 @@ class AssemblyCheckApp {
             processButton.disabled = false;
             processButton.textContent = 'Generate Report';
         }
+    }
+
+    /**
+     * Merge risultati parziali da un chunk nei risultati totali
+     * @param {Object} allResults - Oggetto con tutti i risultati accumulati
+     * @param {Object} chunkResults - Risultati dal chunk corrente
+     */
+    mergeResults(allResults, chunkResults) {
+        // Merge pdfFreq (frequenze codici nei PDF)
+        for (const [code, count] of Object.entries(chunkResults.pdfFreq || {})) {
+            allResults.pdfFreq[code] = (allResults.pdfFreq[code] || 0) + count;
+        }
+
+        // ExcelFreq e excelData: prendi dal primo chunk (è sempre uguale)
+        if (Object.keys(allResults.excelFreq).length === 0) {
+            allResults.excelFreq = chunkResults.excelFreq;
+            allResults.excelData = chunkResults.excelData;
+            allResults.excelRowsProcessed = chunkResults.excelRowsProcessed;
+            allResults.totalExcelCodes = chunkResults.totalExcelCodes;
+        }
+
+        // Accumula totali PDF
+        allResults.totalPdfCodes += chunkResults.totalPdfCodes || 0;
+        allResults.pdfFilesProcessed += chunkResults.pdfFilesProcessed || 0;
+    }
+
+    /**
+     * Ricalcola matches, discrepanze, ecc. dopo merge
+     * @param {Object} allResults - Oggetto con tutti i risultati da finalizzare
+     */
+    finalizeResults(allResults) {
+        // Ricalcola matches e discrepanze
+        const allCodes = new Set([
+            ...Object.keys(allResults.pdfFreq),
+            ...Object.keys(allResults.excelFreq)
+        ]);
+
+        allResults.matches = [];
+        allResults.pdfOnly = [];
+        allResults.excelOnly = [];
+        allResults.quantityCorrect = [];
+        allResults.quantityMissing = [];
+        allResults.quantityExtra = [];
+
+        allCodes.forEach(code => {
+            const pdfCount = allResults.pdfFreq[code] || 0;
+            const excelCount = allResults.excelFreq[code] || 0;
+
+            if (pdfCount > 0 && excelCount > 0) {
+                allResults.matches.push(code);
+                
+                if (pdfCount === excelCount) {
+                    allResults.quantityCorrect.push({
+                        code, pdf: pdfCount, excel: excelCount
+                    });
+                } else if (pdfCount < excelCount) {
+                    allResults.quantityMissing.push({
+                        code, pdf: pdfCount, excel: excelCount, missing: excelCount - pdfCount
+                    });
+                } else {
+                    allResults.quantityExtra.push({
+                        code, pdf: pdfCount, excel: excelCount, extra: pdfCount - excelCount
+                    });
+                }
+            } else if (pdfCount > 0 && excelCount === 0) {
+                allResults.pdfOnly.push(code);
+            } else if (excelCount > 0 && pdfCount === 0) {
+                allResults.excelOnly.push(code);
+            }
+        });
+
+        // Conta codici unici
+        allResults.totalPdfUnique = Object.keys(allResults.pdfFreq).length;
+        allResults.totalExcelUnique = Object.keys(allResults.excelFreq).length;
     }
 
     updateProcessButton() {
