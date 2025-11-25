@@ -161,6 +161,8 @@ class AssemblyCheckApp {
             for (let i = 0; i < pdfChunks.length; i++) {
                 const chunk = pdfChunks[i];
                 
+                console.log(`\n📦 Processing Batch ${i + 1}/${totalChunks} with ${chunk.length} PDFs`);
+                
                 // Update progress
                 const progress = ((i + 1) / totalChunks) * 100;
                 document.querySelector('.progress-fill').style.width = `${progress}%`;
@@ -189,13 +191,31 @@ class AssemblyCheckApp {
                     throw new Error(`Batch ${i + 1}: ${apiResponse.error}`);
                 }
 
+                console.log(`✅ Batch ${i + 1} response:`, {
+                    success: apiResponse.success,
+                    pdfFilesProcessed: apiResponse.results.pdfFilesProcessed,
+                    totalPdfCodes: apiResponse.results.totalPdfCodes,
+                    pdfFreqKeys: Object.keys(apiResponse.results.pdfFreq || {}).length
+                });
+
                 // *** MERGE RISULTATI ***
                 this.mergeResults(allResults, apiResponse.results);
             }
 
             // *** FINALIZZA RISULTATI ***
+            console.log('\n🎯 FINALIZE RESULTS');
+            console.log('Total pdfFreq before finalize:', JSON.parse(JSON.stringify(allResults.pdfFreq)));
+            console.log('Sample codes:', {
+                MG2001: allResults.pdfFreq['MG2001'],
+                MG2002: allResults.pdfFreq['MG2002'],
+                MG2003: allResults.pdfFreq['MG2003'],
+                MG2004: allResults.pdfFreq['MG2004']
+            });
+            
             this.finalizeResults(allResults);
             this.results = allResults;
+            
+            console.log('✅ Final results ready');
             this.displayResults();
             
         } catch (error) {
@@ -213,10 +233,19 @@ class AssemblyCheckApp {
      * @param {Object} chunkResults - Risultati dal chunk corrente
      */
     mergeResults(allResults, chunkResults) {
+        console.log('=== MERGE RESULTS DEBUG ===');
+        console.log('Chunk pdfFreq:', chunkResults.pdfFreq);
+        console.log('Current allResults.pdfFreq BEFORE merge:', JSON.parse(JSON.stringify(allResults.pdfFreq)));
+        
         // Merge pdfFreq (frequenze codici nei PDF)
         for (const [code, count] of Object.entries(chunkResults.pdfFreq || {})) {
-            allResults.pdfFreq[code] = (allResults.pdfFreq[code] || 0) + count;
+            const oldValue = allResults.pdfFreq[code] || 0;
+            allResults.pdfFreq[code] = oldValue + count;
+            console.log(`Code ${code}: ${oldValue} + ${count} = ${allResults.pdfFreq[code]}`);
         }
+        
+        console.log('Current allResults.pdfFreq AFTER merge:', JSON.parse(JSON.stringify(allResults.pdfFreq)));
+        console.log('=== END MERGE ===\n');
 
         // ExcelFreq e excelData: prendi dal primo chunk (è sempre uguale)
         if (Object.keys(allResults.excelFreq).length === 0) {
