@@ -126,8 +126,8 @@ class AssemblyCheckApp {
                 startRow: parseInt(document.getElementById('riga-partenza')?.value || '1', 10)
             };
 
-            // *** CHUNKING: Dividi PDF in gruppi da 10 ***
-            const pdfChunks = this.chunkArray(this.pdfFilesBase64, 10);
+            // *** CHUNKING: Dividi PDF in gruppi da 5 (ridotto da 10 per evitare timeout backend) ***
+            const pdfChunks = this.chunkArray(this.pdfFilesBase64, 5);
             const totalChunks = pdfChunks.length;
             
             resultsDiv.innerHTML = `
