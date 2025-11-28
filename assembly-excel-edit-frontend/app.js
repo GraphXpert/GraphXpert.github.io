@@ -1,3 +1,8 @@
+// API Configuration
+// Per sviluppo locale: 'http://localhost:3000'
+// Per produzione: 'https://assembly-excel-edit-backend.onrender.com'
+const API_BASE_URL = 'https://assembly-excel-edit-backend.onrender.com';
+
 // DOM Elements
 const uploadForm = document.getElementById('uploadForm');
 const assemblyListInput = document.getElementById('assemblyList');
@@ -92,7 +97,7 @@ uploadForm.addEventListener('submit', async (e) => {
         updateProgress(20, 'Caricamento file al server...');
 
         // Send request to server
-        const response = await fetch('/generate', {
+        const response = await fetch(`${API_BASE_URL}/generate`, {
             method: 'POST',
             body: formData
         });
