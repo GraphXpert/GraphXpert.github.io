@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Diff Viewer - LIST CHECK Web</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">Excel Diff Viewer</h1>
+                <a href="https://graphxpert.github.io" class="home-btn" title="Torna alla Home">
+                    🏠 Home
+                </a>
+            </div>
+            <p class="subtitle">Confronto tra File Excel con Evidenziazione Differenze</p>
+            <p class="description">
+                🔍 Carica la versione originale e quella revisionata per ottenere un file Excel con le differenze evidenziate in colore
+            </p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- File Upload Section -->
+            <section class="file-section">
+                <h3 class="section-heading">📁 Carica i File Excel</h3>
+
+                <div class="file-input-group">
+                    <label class="file-label">
+                        <span class="icon">📄</span>
+                        <span class="label-text">File Originale</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <input
+                            type="file"
+                            id="oldFileInput"
+                            accept=".xlsx,.xls"
+                            style="display: none;"
+                        >
+                        <input
+                            type="text"
+                            id="oldFileName"
+                            class="file-path-input"
+                            placeholder="Nessun file selezionato..."
+                            readonly
+                        >
+                        <button id="selectOldFile" class="select-btn">SCEGLI FILE</button>
+                    </div>
+                </div>
+
+                <div class="file-input-group">
+                    <label class="file-label">
+                        <span class="icon">📄</span>
+                        <span class="label-text">File Revisionato</span>
+                    </label>
+                    <div class="input-wrapper">
+                        <input
+                            type="file"
+                            id="newFileInput"
+                            accept=".xlsx,.xls"
+                            style="display: none;"
+                        >
+                        <input
+                            type="text"
+                            id="newFileName"
+                            class="file-path-input"
+                            placeholder="Nessun file selezionato..."
+                            readonly
+                        >
+                        <button id="selectNewFile" class="select-btn">SCEGLI FILE</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Configuration Section -->
+            <section class="file-section">
+                <h3 class="section-heading">⚙️ Configurazione Confronto</h3>
+                <div class="config-grid">
+                    <div class="file-input-group">
+                        <label class="file-label">
+                            <span class="icon">📍</span>
+                            <span class="label-text">Riga di partenza</span>
+                        </label>
+                        <input
+                            type="number"
+                            id="startRow"
+                            class="file-path-input config-input"
+                            placeholder="Es: 19"
+                            value="19"
+                            min="1"
+                        >
+                    </div>
+                    <div class="file-input-group">
+                        <label class="file-label">
+                            <span class="icon">📍</span>
+                            <span class="label-text">Colonna di partenza</span>
+                        </label>
+                        <input
+                            type="number"
+                            id="startCol"
+                            class="file-path-input config-input"
+                            placeholder="Es: 2 (colonna B)"
+                            value="2"
+                            min="1"
+                        >
+                    </div>
+                </div>
+                <p class="help-text">
+                    ℹ️ Riga: numero riga da cui iniziare | Colonna: 1=A, 2=B, 3=C, ecc.
+                </p>
+            </section>
+
+            <!-- Action Button -->
+            <div class="action-section">
+                <button id="compareBtn" class="compare-btn" disabled>
+                    <span class="btn-icon">🚀</span>
+                    <span class="btn-text">AVVIA CONFRONTO</span>
+                </button>
+                <p class="info-text">
+                    ℹ️ Il file modificato verrà scaricato automaticamente
+                </p>
+            </div>
+
+            <!-- Progress Section -->
+            <div id="progressSection" class="progress-section" style="display: none;">
+                <div class="progress-bar">
+                    <div id="progressBar" class="progress-fill"></div>
+                </div>
+                <p id="progressText" class="progress-text">Elaborazione in corso...</p>
+            </div>
+
+            <!-- Results Section -->
+            <section id="resultsSection" class="results-section" style="display: none;">
+                <h2 class="section-title">📊 Riepilogo Modifiche</h2>
+
+                <div class="stats-grid">
+                    <div class="stat-card stat-sheets">
+                        <div class="stat-icon">📋</div>
+                        <div class="stat-content">
+                            <div class="stat-label">Fogli Totali</div>
+                            <div id="totalSheets" class="stat-value">0</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card stat-added">
+                        <div class="stat-icon">🟢</div>
+                        <div class="stat-content">
+                            <div class="stat-label">Righe Aggiunte</div>
+                            <div id="addedRows" class="stat-value">0</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card stat-modified">
+                        <div class="stat-icon">🟡</div>
+                        <div class="stat-content">
+                            <div class="stat-label">Celle Modificate</div>
+                            <div id="modifiedCells" class="stat-value">0</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card stat-removed">
+                        <div class="stat-icon">🔴</div>
+                        <div class="stat-content">
+                            <div class="stat-label">Righe Rimosse</div>
+                            <div id="removedRows" class="stat-value">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="total-changes">
+                    <span class="total-label">TOTALE MODIFICHE:</span>
+                    <span id="totalChanges" class="total-value">0</span>
+                </div>
+
+                <div class="success-message">
+                    <div class="success-icon">✅</div>
+                    <div class="success-content">
+                        <p class="success-title">Download completato!</p>
+                        <p class="success-desc">Il file con le differenze evidenziate è stato scaricato. Controlla la cartella Download.</p>
+                        <p class="success-desc"><strong>File:</strong> <span id="outputFilename">-</span></p>
+                    </div>
+                </div>
+
+                <div class="color-legend">
+                    <h4 class="legend-title">Legenda Colori</h4>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #d4edda; border: 2px solid #28a745;"></div>
+                            <span>Righe Aggiunte (Verde)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #fff3cd; border: 2px solid #ffc107;"></div>
+                            <span>Celle Modificate (Giallo)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background: #f8d7da; border: 2px solid #dc3545;"></div>
+                            <span>Righe Rimosse (Rosso)</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Error Section -->
+            <section id="errorSection" class="error-section" style="display: none;">
+                <div class="error-card">
+                    <div class="error-icon">❌</div>
+                    <div class="error-content">
+                        <h3 class="error-title">Errore durante il confronto</h3>
+                        <p id="errorMessage" class="error-message">Si è verificato un errore.</p>
+                        <button id="retryBtn" class="retry-btn">🔄 Riprova</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>GraphXpert - Excel Diff Viewer v1.0.0 | <a href="https://graphxpert.github.io" style="color: white; text-decoration: underline;">Torna alla Home</a></p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
