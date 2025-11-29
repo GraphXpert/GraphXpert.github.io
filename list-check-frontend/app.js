@@ -1,12 +1,12 @@
 /**
- * LIST CHECK FRONTEND - Excel Diff Viewer Client
+ * LIST CHECK FRONTEND - Excel Diff Viewer Client (MULTI-FILE VERSION)
  *
  * This script handles:
- * - File selection
- * - Form validation
- * - API communication with backend
- * - Progress indication
- * - Results display
+ * - Multiple file selection
+ * - Form validation (same number of old/new files)
+ * - Sequential API communication for each file pair
+ * - Progress indication with [N/total]
+ * - Aggregated results display
  * - Error handling
  */
 
@@ -15,9 +15,10 @@
 // const API_BASE_URL = 'http://localhost:3000'; // Development
 const API_BASE_URL = 'https://list-check-backend.onrender.com'; // Production
 
-// State
-let selectedOldFile = null;
-let selectedNewFile = null;
+// State - Arrays for multiple files
+let selectedOldFiles = [];
+let selectedNewFiles = [];
+let allResults = []; // Array of results for each pair
 
 // DOM Elements
 const elements = {
@@ -69,13 +70,13 @@ function init() {
         elements.newFileInput.click();
     });
 
-    // File input changes
+    // File input changes - MULTIPLE FILES
     elements.oldFileInput.addEventListener('change', (e) => {
-        handleFileSelection(e.target.files[0], 'old');
+        handleMultipleFileSelection(e.target.files, 'old');
     });
 
     elements.newFileInput.addEventListener('change', (e) => {
-        handleFileSelection(e.target.files[0], 'new');
+        handleMultipleFileSelection(e.target.files, 'new');
     });
 
     // Compare button
@@ -87,70 +88,95 @@ function init() {
         hideResults();
     });
 
-    console.log('App initialized');
+    console.log('App initialized (multi-file mode)');
 }
 
 /**
- * Handle file selection
+ * Handle multiple file selection
  */
-function handleFileSelection(file, type) {
-    if (!file) return;
+function handleMultipleFileSelection(files, type) {
+    if (!files || files.length === 0) return;
 
-    // Validate file type
+    // Convert FileList to Array
+    const fileArray = Array.from(files);
+
+    // Validate file types
     const validTypes = [
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'application/vnd.ms-excel'
     ];
 
-    if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls)$/i)) {
-        alert('Per favore seleziona un file Excel valido (.xlsx o .xls)');
-        return;
+    for (const file of fileArray) {
+        if (!validTypes.includes(file.type) && !file.name.match(/\.(xlsx|xls)$/i)) {
+            alert(`File non valido: ${file.name}. Solo .xlsx o .xls`);
+            return;
+        }
+
+        // Validate file size (50MB max per file)
+        const maxSize = 50 * 1024 * 1024; // 50MB
+        if (file.size > maxSize) {
+            alert(`File troppo grande: ${file.name}. Max 50MB`);
+            return;
+        }
     }
 
-    // Validate file size (50MB max)
-    const maxSize = 50 * 1024 * 1024; // 50MB
-    if (file.size > maxSize) {
-        alert(`Il file è troppo grande. Dimensione massima: 50MB`);
-        return;
-    }
-
-    // Store file and update UI
+    // Store files and update UI
     if (type === 'old') {
-        selectedOldFile = file;
-        elements.oldFileName.value = file.name;
-        console.log('Old file selected:', file.name);
+        selectedOldFiles = fileArray;
+        const fileNames = fileArray.map(f => f.name).join(', ');
+        elements.oldFileName.value = `${fileArray.length} file: ${fileNames}`;
+        console.log(`Selected ${fileArray.length} old files:`, fileArray.map(f => f.name));
     } else {
-        selectedNewFile = file;
-        elements.newFileName.value = file.name;
-        console.log('New file selected:', file.name);
+        selectedNewFiles = fileArray;
+        const fileNames = fileArray.map(f => f.name).join(', ');
+        elements.newFileName.value = `${fileArray.length} file: ${fileNames}`;
+        console.log(`Selected ${fileArray.length} new files:`, fileArray.map(f => f.name));
     }
 
-    // Enable compare button if both files selected
+    // Enable compare button if valid selection
     updateCompareButton();
 }
 
 /**
  * Update compare button state
+ * Enable ONLY if same number of old and new files
  */
 function updateCompareButton() {
-    const bothFilesSelected = selectedOldFile && selectedNewFile;
-    elements.compareBtn.disabled = !bothFilesSelected;
+    const oldCount = selectedOldFiles.length;
+    const newCount = selectedNewFiles.length;
 
-    if (bothFilesSelected) {
+    if (oldCount > 0 && newCount > 0 && oldCount === newCount) {
+        elements.compareBtn.disabled = false;
         elements.compareBtn.classList.add('enabled');
+        console.log(`Compare button enabled: ${oldCount} pairs ready`);
     } else {
+        elements.compareBtn.disabled = true;
         elements.compareBtn.classList.remove('enabled');
+        if (oldCount !== newCount && oldCount > 0 && newCount > 0) {
+            console.warn(`File count mismatch: ${oldCount} old files vs ${newCount} new files`);
+        }
     }
 }
 
 /**
- * Handle compare button click
+ * Handle compare button click - Process ALL file pairs
  */
 async function handleCompare() {
-    if (!selectedOldFile || !selectedNewFile) {
-        alert('Per favore seleziona entrambi i file');
+    const numPairs = selectedOldFiles.length;
+
+    if (numPairs === 0) {
+        alert('Seleziona i file da confrontare');
         return;
     }
+
+    // Confirm action
+    const confirmed = confirm(
+        `Elaborazione di ${numPairs} coppia/e di file.\n\n` +
+        `Verranno scaricati ${numPairs} file modificati.\n\n` +
+        `Vuoi continuare?`
+    );
+
+    if (!confirmed) return;
 
     // Hide previous results/errors
     hideResults();
@@ -158,18 +184,64 @@ async function handleCompare() {
 
     // Show progress
     showProgress(true);
-    updateProgress(0, 'Preparazione file...');
+    allResults = []; // Reset results
+
+    try {
+        // Process each pair sequentially
+        for (let i = 0; i < numPairs; i++) {
+            const oldFile = selectedOldFiles[i];
+            const newFile = selectedNewFiles[i];
+
+            // Calculate progress for this pair
+            const baseProgress = (i / numPairs) * 100;
+            const stepProgress = 100 / numPairs;
+
+            console.log(`Processing pair ${i + 1}/${numPairs}: ${newFile.name}`);
+
+            // Process this pair
+            const result = await processSinglePair(
+                oldFile,
+                newFile,
+                i + 1,
+                numPairs,
+                baseProgress,
+                stepProgress
+            );
+
+            allResults.push(result);
+        }
+
+        // All pairs processed successfully
+        updateProgress(100, `Completato! ${numPairs} file processati.`);
+
+        // Show aggregated results
+        setTimeout(() => {
+            hideProgress();
+            showAggregatedResults();
+        }, 800);
+
+    } catch (error) {
+        console.error('Error during comparison:', error);
+        hideProgress();
+        showError(error.message);
+    }
+}
+
+/**
+ * Process a single file pair
+ */
+async function processSinglePair(oldFile, newFile, pairIndex, totalPairs, baseProgress, stepProgress) {
+    const fileName = newFile.name;
 
     try {
         // Create FormData
         const formData = new FormData();
-        formData.append('oldFile', selectedOldFile);
-        formData.append('newFile', selectedNewFile);
+        formData.append('oldFile', oldFile);
+        formData.append('newFile', newFile);
         formData.append('startRow', elements.startRow.value || '19');
         formData.append('startCol', elements.startCol.value || '2');
 
-        console.log('Sending files to backend...');
-        updateProgress(20, 'Caricamento file...');
+        updateProgress(baseProgress + stepProgress * 0.2, `[${pairIndex}/${totalPairs}] Caricamento ${fileName}...`);
 
         // API call
         const response = await fetch(`${API_BASE_URL}/compare`, {
@@ -177,28 +249,26 @@ async function handleCompare() {
             body: formData
         });
 
-        updateProgress(50, 'Confronto in corso...');
+        updateProgress(baseProgress + stepProgress * 0.6, `[${pairIndex}/${totalPairs}] Confronto ${fileName}...`);
 
         if (!response.ok) {
             const errorData = await response.json();
-            throw new Error(errorData.details || errorData.error || 'Errore durante il confronto');
+            throw new Error(`${fileName}: ${errorData.details || errorData.error}`);
         }
 
-        updateProgress(70, 'Generazione file...');
-
-        // Read statistics from custom headers
+        // Read statistics from headers
         const stats = {
             totalSheets: parseInt(response.headers.get('X-Total-Sheets')) || 0,
             addedRows: parseInt(response.headers.get('X-Added-Rows')) || 0,
             modifiedCells: parseInt(response.headers.get('X-Modified-Cells')) || 0,
             removedRows: parseInt(response.headers.get('X-Removed-Rows')) || 0,
             totalChanges: parseInt(response.headers.get('X-Total-Changes')) || 0,
-            outputFilename: response.headers.get('X-Output-Filename') || 'output.xlsx'
+            outputFilename: response.headers.get('X-Output-Filename') || `${fileName}_DIFF.xlsx`
         };
 
-        console.log('Statistics:', stats);
+        console.log(`Stats for ${fileName}:`, stats);
 
-        updateProgress(80, 'Download file...');
+        updateProgress(baseProgress + stepProgress * 0.8, `[${pairIndex}/${totalPairs}] Download ${fileName}...`);
 
         // Download file
         const blob = await response.blob();
@@ -211,20 +281,14 @@ async function handleCompare() {
         document.body.removeChild(a);
         window.URL.revokeObjectURL(url);
 
-        console.log('File downloaded:', stats.outputFilename);
+        console.log(`File downloaded: ${stats.outputFilename}`);
 
-        updateProgress(100, 'Completato!');
+        updateProgress(baseProgress + stepProgress, `[${pairIndex}/${totalPairs}] Completato!`);
 
-        // Show results after a delay
-        setTimeout(() => {
-            hideProgress();
-            showResults(stats);
-        }, 800);
+        return stats;
 
     } catch (error) {
-        console.error('Error during comparison:', error);
-        hideProgress();
-        showError(error.message);
+        throw new Error(`Errore file ${fileName}: ${error.message}`);
     }
 }
 
@@ -256,16 +320,45 @@ function updateProgress(percentage, text) {
 }
 
 /**
- * Show results section
+ * Show aggregated results from all file pairs
  */
-function showResults(stats) {
-    // Update statistics
-    elements.totalSheets.textContent = stats.totalSheets;
-    elements.addedRows.textContent = stats.addedRows;
-    elements.modifiedCells.textContent = stats.modifiedCells;
-    elements.removedRows.textContent = stats.removedRows;
-    elements.totalChanges.textContent = stats.totalChanges;
-    elements.outputFilename.textContent = stats.outputFilename;
+function showAggregatedResults() {
+    if (allResults.length === 0) return;
+
+    // Aggregate statistics from all pairs
+    let totalSheets = 0;
+    let totalAddedRows = 0;
+    let totalModifiedCells = 0;
+    let totalRemovedRows = 0;
+    let totalChanges = 0;
+
+    allResults.forEach(stats => {
+        totalSheets += stats.totalSheets;
+        totalAddedRows += stats.addedRows;
+        totalModifiedCells += stats.modifiedCells;
+        totalRemovedRows += stats.removedRows;
+        totalChanges += stats.totalChanges;
+    });
+
+    // Update statistics display
+    elements.totalSheets.textContent = totalSheets;
+    elements.addedRows.textContent = totalAddedRows;
+    elements.modifiedCells.textContent = totalModifiedCells;
+    elements.removedRows.textContent = totalRemovedRows;
+    elements.totalChanges.textContent = totalChanges;
+
+    // Update output filename text
+    const numFiles = allResults.length;
+    elements.outputFilename.textContent = `${numFiles} file scaricati`;
+
+    console.log('Aggregated stats:', {
+        totalSheets,
+        totalAddedRows,
+        totalModifiedCells,
+        totalRemovedRows,
+        totalChanges,
+        filesProcessed: numFiles
+    });
 
     // Show results section with animation
     elements.resultsSection.style.display = 'block';
@@ -301,17 +394,6 @@ function showError(message) {
  */
 function hideError() {
     elements.errorSection.style.display = 'none';
-}
-
-/**
- * Format file size
- */
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
 }
 
 // Initialize on DOM ready
