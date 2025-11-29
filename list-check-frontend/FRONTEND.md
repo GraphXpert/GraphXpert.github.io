@@ -4,15 +4,16 @@ Frontend documentation for Excel Diff Viewer web application.
 
 ## 📋 Overview
 
-Static frontend application hosted on GitHub Pages that allows users to upload two Excel files and receive a color-coded comparison.
+Static frontend application hosted on GitHub Pages that allows users to upload **multiple Excel files** and receive color-coded comparisons. Identical functionality to the desktop Electron app.
 
 ### Key Features
 
-- ✅ **File Upload** - Drag-and-drop or click to upload
+- ✅ **Multi-File Upload** - Select multiple file pairs at once (same as desktop app)
+- ✅ **Batch Processing** - Process N file pairs sequentially with [N/total] progress
 - ✅ **Configuration** - Customize start row and column
-- ✅ **Progress Indication** - Real-time progress bar
-- ✅ **Statistics Display** - Visual cards with change counts
-- ✅ **Auto Download** - Modified file downloads automatically
+- ✅ **Progress Indication** - Real-time progress bar with per-file status
+- ✅ **Statistics Display** - Aggregated statistics from all processed files
+- ✅ **Auto Download** - All modified files download automatically
 - ✅ **Responsive Design** - Works on desktop, tablet, and mobile
 - ✅ **Modern UI** - Purple/blue gradient theme matching desktop app
 
@@ -146,16 +147,17 @@ const stats = {
 
 ## 📱 User Flow
 
+### Single File Pair
 ```
 1. User lands on page
    ↓
 2. User clicks "SCEGLI FILE" for old file
    ↓
-3. User selects original Excel file
+3. User selects 1 original Excel file
    ↓
 4. User clicks "SCEGLI FILE" for new file
    ↓
-5. User selects revised Excel file
+5. User selects 1 revised Excel file
    ↓
 6. (Optional) User adjusts start row/column
    ↓
@@ -171,6 +173,42 @@ const stats = {
    ↓
 12. User opens downloaded file in Excel
 ```
+
+### Multiple File Pairs (NEW - Same as Desktop!)
+```
+1. User lands on page
+   ↓
+2. User clicks "SCEGLI FILE" for old files
+   ↓
+3. User selects MULTIPLE original Excel files (Ctrl+Click or Shift+Click)
+   ↓
+4. Label shows: "N file: file1.xlsx, file2.xlsx, ..."
+   ↓
+5. User clicks "SCEGLI FILE" for new files
+   ↓
+6. User selects SAME NUMBER of revised Excel files
+   ↓
+7. Label shows: "N file: file1_rev.xlsx, file2_rev.xlsx, ..."
+   ↓
+8. Compare button becomes enabled (ONLY if same number!)
+   ↓
+9. User clicks "AVVIA CONFRONTO"
+   ↓
+10. Confirmation dialog: "Elaborazione di N coppia/e di file"
+   ↓
+11. Progress bar shows [1/N], [2/N], ... for each pair
+   ↓
+12. ALL N files download automatically (one by one)
+   ↓
+13. Aggregated statistics display (sum of all files)
+   ↓
+14. User opens all downloaded files in Excel
+```
+
+**Important**:
+- Number of OLD files MUST equal number of NEW files
+- Files are paired by selection order: old[0]+new[0], old[1]+new[1], etc.
+- Each pair is processed sequentially (not in parallel)
 
 ## 🎯 UI Components
 
