@@ -122,6 +122,15 @@ uploadForm.addEventListener('submit', async (e) => {
             }
         }
 
+        // Estrai statistiche dagli headers custom
+        const stats = {
+            totalAssemblies: response.headers.get('X-Total-Assemblies') || '-',
+            totalParts: response.headers.get('X-Total-Parts') || '-',
+            totalFormulas: response.headers.get('X-Total-Formulas') || '-',
+            totalWeight: response.headers.get('X-Total-Weight') || '-',
+            outputFilename: response.headers.get('X-Output-Filename') || filename
+        };
+
         // Download file
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
@@ -138,7 +147,7 @@ uploadForm.addEventListener('submit', async (e) => {
         // Show success message and stats
         setTimeout(() => {
             hideElement(progressSection);
-            showResults(filename);
+            showResults(stats);
         }, 500);
 
     } catch (error) {
@@ -164,26 +173,25 @@ function showError(message) {
 }
 
 // Show results section with stats
-function showResults(filename) {
-    // Note: Per una versione completa, il server dovrebbe restituire le statistiche
-    // Per ora mostriamo valori placeholder che verranno aggiornati quando
-    // implementeremo il ritorno delle stats dal server
+function showResults(stats) {
+    // Mostra statistiche ricevute dal backend via headers HTTP
 
-    // Estrai timestamp dal filename se presente
-    const filenameOnly = filename.split('/').pop().split('\\').pop();
+    // Update stats con valori reali dal backend
+    document.getElementById('totalAssemblies').textContent = stats.totalAssemblies;
+    document.getElementById('totalWeight').textContent = stats.totalWeight ?
+        parseFloat(stats.totalWeight).toFixed(2) + ' kg' : '-';
+    document.getElementById('totalParts').textContent = stats.totalParts;
+    document.getElementById('totalFormulas').textContent = stats.totalFormulas;
+    document.getElementById('outputFile').textContent = stats.outputFilename || 'File generato';
 
-    // Update stats (placeholder values - idealmente dovrebbero arrivare dal server)
-    document.getElementById('totalAssemblies').textContent = '-';
-    document.getElementById('totalWeight').textContent = '-';
-    document.getElementById('totalParts').textContent = '-';
-    document.getElementById('totalFormulas').textContent = '-';
-    document.getElementById('outputFile').textContent = filenameOnly;
+    // Update details table con valori calcolati
+    const assemblyFormulas = stats.totalAssemblies ? stats.totalAssemblies * 2 : 0; // Qty + Weight per ogni assembly
+    const partFormulas = stats.totalParts ? stats.totalParts * 5 : 0; // Dimension, Grade, Length, Weight, Area per ogni part
 
-    // Update details table
-    document.getElementById('detailAssemblies').textContent = '-';
-    document.getElementById('detailAssemblyFormulas').textContent = 'Qty + Weight';
-    document.getElementById('detailParts').textContent = '-';
-    document.getElementById('detailPartFormulas').textContent = 'Dimension, Grade, Length, Weight, Area';
+    document.getElementById('detailAssemblies').textContent = stats.totalAssemblies;
+    document.getElementById('detailAssemblyFormulas').textContent = `${assemblyFormulas} (Qty + Weight)`;
+    document.getElementById('detailParts').textContent = stats.totalParts;
+    document.getElementById('detailPartFormulas').textContent = `${partFormulas} (Dimension, Grade, Length, Weight, Area)`;
 
     showElement(resultsSection);
 
