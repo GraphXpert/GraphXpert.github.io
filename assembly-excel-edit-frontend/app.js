@@ -182,7 +182,6 @@ function showResults(stats) {
         parseFloat(stats.totalWeight).toFixed(2) + ' kg' : '-';
     document.getElementById('totalParts').textContent = stats.totalParts;
     document.getElementById('totalFormulas').textContent = stats.totalFormulas;
-    document.getElementById('outputFile').textContent = stats.outputFilename || 'File generato';
 
     // Update details table con valori calcolati
     const assemblyFormulas = stats.totalAssemblies ? stats.totalAssemblies * 2 : 0; // Qty + Weight per ogni assembly
