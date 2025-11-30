@@ -4,6 +4,7 @@ Applicazione web client‑side per confrontare i codici alfanumerici tra Disegni
 
 ## Funzionalità
 
+- **Navigazione Home** – pulsante rapido per tornare alla pagina principale GraphXpert
 - **Elaborazione lato client** – nessun server, tutto nel browser
 - **Drag & drop** – carica rapidamente Excel e più PDF
 - **Estrazione testo PDF** – con `pdf.js` (CDN)
