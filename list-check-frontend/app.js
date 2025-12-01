@@ -13,7 +13,7 @@
 // API Configuration
 // IMPORTANT: Update this URL when deploying to production
 // const API_BASE_URL = 'http://localhost:3000'; // Development
-const API_BASE_URL = 'https://list-check-electron-backend.onrender.com'; // Production
+const API_BASE_URL = 'https://list-check-backend.onrender.com'; // Production
 
 // State - Arrays for multiple files
 let selectedOldFiles = [];
