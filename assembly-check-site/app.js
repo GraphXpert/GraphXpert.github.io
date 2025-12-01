@@ -170,7 +170,7 @@ class AssemblyCheckApp {
                     `Batch ${i + 1} of ${totalChunks} (${chunk.length} PDF${chunk.length > 1 ? 's' : ''})`;
 
                 // Chiamata API per questo chunk
-                const response = await fetch('https://graphxpert-backend.onrender.com/api/analyze', {
+                const response = await fetch('https://list-check-electron-backend.onrender.com/api/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
