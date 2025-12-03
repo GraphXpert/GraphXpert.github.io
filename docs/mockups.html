@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mockup Home GraphXpert</title>
+  <style>
+    :root { --primary-color:#6a11cb; --secondary-color:#2575fc; --bg:#0c0a1f; --text:#f0f0f0; --card:rgba(255,255,255,0.05); --border:rgba(255,255,255,0.1); }
+    body { margin:0; font-family:Poppins,system-ui,sans-serif; background:var(--bg); color:var(--text); }
+    .page { max-width:1200px; margin:0 auto; padding:24px; }
+    .grid { display:grid; gap:24px; grid-template-columns: 1fr; }
+    .frame { border:1px solid var(--border); border-radius:16px; background:var(--card); padding:16px; }
+    .label { font-weight:600; margin:0 0 12px 0; opacity:.8; }
+    .mock {
+      background:var(--card); border:1px solid var(--border); border-radius:16px; padding:24px; 
+    }
+    .brand { margin:0 0 16px 0; font-size: 1.6rem; font-weight:700; background:linear-gradient(45deg,var(--primary-color),var(--secondary-color)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .tools { display:grid; gap:16px; }
+    .card { background:var(--card); border:1px solid var(--border); border-radius:12px; padding:16px; }
+    .card h2 { margin:0 0 8px 0; font-size:1.2rem; }
+    .card p { margin:0 0 12px 0; opacity:.9; }
+    .card a { display:inline-block; padding:10px 16px; border-radius:10px; color:#fff; text-decoration:none; background:linear-gradient(135deg,var(--primary-color),var(--secondary-color)); }
+    @media (min-width:1024px) { .grid { grid-template-columns: 1fr 1fr; } .tools { grid-template-columns: repeat(3,1fr); } }
+    @media (max-width:767px) { .tools { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="grid">
+      <div class="frame">
+        <p class="label">Desktop ≥1024px</p>
+        <div class="mock">
+          <h1 class="brand">GraphXpert</h1>
+          <div class="tools">
+            <div class="card"><h2>Assembly Check</h2><p>Verifica assemblaggi e conformità, rileva errori prima del rilascio.</p><a href="/assembly-check-site/">Apri</a></div>
+            <div class="card"><h2>Assembly Excel Edit</h2><p>Modifica e valida dati di assemblaggio in Excel con regole e controlli.</p><a href="/assembly-excel-edit-frontend/">Apri</a></div>
+            <div class="card"><h2>LIST CHECK</h2><p>Controlla liste e distinte, individua incongruenze e genera report.</p><a href="/list-check-frontend/">Apri</a></div>
+          </div>
+        </div>
+      </div>
+      <div class="frame">
+        <p class="label">Mobile ≤767px</p>
+        <div class="mock">
+          <h1 class="brand">GraphXpert</h1>
+          <div class="tools">
+            <div class="card"><h2>Assembly Check</h2><p>Verifica assemblaggi e conformità, rileva errori prima del rilascio.</p><a href="/assembly-check-site/">Apri</a></div>
+            <div class="card"><h2>Assembly Excel Edit</h2><p>Modifica e valida dati di assemblaggio in Excel con regole e controlli.</p><a href="/assembly-excel-edit-frontend/">Apri</a></div>
+            <div class="card"><h2>LIST CHECK</h2><p>Controlla liste e distinte, individua incongruenze e genera report.</p><a href="/list-check-frontend/">Apri</a></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

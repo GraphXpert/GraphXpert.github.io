@@ -3,99 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GraphXpert - Sito in costruzione</title>
-    <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            overflow: hidden;
-        }
-        .background {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                linear-gradient(45deg, #2c3e50 25%, transparent 25%),
-                linear-gradient(-45deg, #2c3e50 25%, transparent 25%),
-                linear-gradient(45deg, transparent 75%, #2c3e50 75%),
-                linear-gradient(-45deg, transparent 75%, #2c3e50 75%);
-            background-size: 60px 60px;
-            animation: moveBackground 20s linear infinite;
-            opacity: 0.2;
-        }
-        .content {
-            position: relative;
-            z-index: 1;
-            text-align: center;
-            padding: 20px;
-            color: #333;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background-color: rgba(255, 255, 255, 0.8);
-        }
-        h1 {
-            font-size: 2.5em;
-            margin-bottom: 20px;
-        }
-        p {
-            font-size: 1.2em;
-            max-width: 600px;
-            line-height: 1.6;
-            margin-bottom: 30px;
-        }
-        .button-container {
-            margin-top: 30px;
-        }
-        .btn {
-            display: inline-block;
-            padding: 15px 40px;
-            margin: 10px;
-            font-size: 1.2em;
-            font-weight: bold;
-            color: white;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 50px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            cursor: pointer;
-        }
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-        }
-        .btn:active {
-            transform: translateY(-1px);
-        }
-        @keyframes moveBackground {
-            0% {
-                background-position: 0 0;
-            }
-            100% {
-                background-position: 60px 60px;
-            }
-        }
-    </style>
+    <title>GraphXpert</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="background"></div>
-    <div class="content">
-        <h1>GraphXpert</h1>
-        <p>Sito in costruzione</p>
-        <p>Stiamo lavorando per migliorare il nostro sito. Presto saremo online.</p>
-        
-        <div class="button-container">
-            <a href="/assembly-check-site/" class="btn">🔧 Vai ad Assembly Check</a>
-            <a href="/assembly-excel-edit-frontend/" class="btn">📊 Vai ad Assembly Excel Edit</a>
-            <a href="/list-check-frontend/" class="btn">📋 Vai a LIST CHECK - Excel Diff Viewer</a>
+    <header class="site-header">
+        <div class="site-brand">
+            <h1 class="brand-title">GraphXpert</h1>
+            <p class="brand-subtitle">Strumenti per il controllo delle distinte e dei disegni.</p>
         </div>
+    </header>
+    <main class="site-main">
+        <section class="tools">
+            <article class="tool-card">
+                <h2 class="tool-title">Assembly Check</h2>
+                <p class="tool-desc">Verifica se nei disegni di montaggio sono presenti tutti gli assiemati.</p>
+                <a href="/assembly-check-site/" class="tool-action">Apri</a>
+            </article>
+            <article class="tool-card">
+                <h2 class="tool-title">Assembly Excel Edit</h2>
+                <p class="tool-desc">Trasformazione della distinta AssemblyPartList in un file Excel editabile.</p>
+                <a href="/assembly-excel-edit-frontend/" class="tool-action">Apri</a>
+            </article>
+            <article class="tool-card">
+                <h2 class="tool-title">LIST CHECK</h2>
+                <p class="tool-desc">Confronto tra liste dopo una revisione.</p>
+                <a href="/list-check-frontend/" class="tool-action">Apri</a>
+            </article>
+        </section>
+    </main>
+    <div class="background-shapes">
+        <div class="shape shape1"></div>
+        <div class="shape shape2"></div>
+        <div class="shape shape3"></div>
     </div>
 </body>
 </html>
