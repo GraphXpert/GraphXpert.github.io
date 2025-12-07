@@ -85,6 +85,15 @@ Cloudflare Worker – API Gateway (https://api.graphxpert.eu)
   ↓
 list-check-backend (https://list-check-backend.onrender.com su Render.com)
 
+Configurazione frontend
+
+Il frontend di List Check è configurato per usare il Cloudflare Worker come API Gateway:
+
+```js
+// list-check-frontend/app.js
+const API_BASE_URL = "https://api.graphxpert.eu"; // Production
+// Le richieste vengono inviate a: POST ${API_BASE_URL}/compare
+
 
 **Descrizione:**
 Applicazione web per confrontare due versioni di file Excel ed evidenziare le differenze. Supporta il caricamento di più coppie di file contemporaneamente e genera file Excel con le modifiche evidenziate in colore.
