@@ -94,6 +94,12 @@ Il frontend di List Check è configurato per usare il Cloudflare Worker come API
 const API_BASE_URL = "https://api.graphxpert.eu"; // Production
 // Le richieste vengono inviate a: POST ${API_BASE_URL}/compare
 
+Sicurezza
+
+- L’accesso a `https://graphxpert.eu/list-check-frontend/` è protetto da **Cloudflare Access** (login con Google o codice email).
+- Solo gli utenti autorizzati dalle policy di Cloudflare possono usare l’interfaccia di List Check.
+- Il backend non è esposto direttamente al browser: il frontend chiama solo `https://api.graphxpert.eu`, che è un **Cloudflare Worker** che fa da proxy verso `https://list-check-backend.onrender.com/compare`.
+
 
 **Descrizione:**
 Applicazione web per confrontare due versioni di file Excel ed evidenziare le differenze. Supporta il caricamento di più coppie di file contemporaneamente e genera file Excel con le modifiche evidenziate in colore.
