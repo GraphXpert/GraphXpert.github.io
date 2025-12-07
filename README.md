@@ -73,6 +73,19 @@ Applicazione web per confrontare codici alfanumerici tra disegni PDF e liste Exc
 
 **URL:** https://graphxpert.eu/list-check-frontend/
 
+Flusso delle richieste (List Check):
+
+Browser utente
+  ↓
+Cloudflare Access (login, autorizzazione)
+  ↓
+GitHub Pages – list-check-frontend (graphxpert.eu)
+  ↓
+Cloudflare Worker – API Gateway (https://api.graphxpert.eu)
+  ↓
+list-check-backend (https://list-check-backend.onrender.com su Render.com)
+
+
 **Descrizione:**
 Applicazione web per confrontare due versioni di file Excel ed evidenziare le differenze. Supporta il caricamento di più coppie di file contemporaneamente e genera file Excel con le modifiche evidenziate in colore.
 
