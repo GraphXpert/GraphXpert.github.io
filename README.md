@@ -104,11 +104,16 @@ Sicurezza
 **Descrizione:**
 Applicazione web per confrontare due versioni di file Excel ed evidenziare le differenze. Supporta il caricamento di più coppie di file contemporaneamente e genera file Excel con le modifiche evidenziate in colore.
 
-Backend:
-  * Repository: https://github.com/GraphXpert/list-check-backend
-  * API Gateway: https://api.graphxpert.eu (Cloudflare Worker)
-  * Origin backend: https://list-check-backend.onrender.com (Render.com)
-  * Endpoint principale: `POST /compare`
+Backend
+
+Il backend di List Check non è accessibile direttamente dal browser.  
+Tutte le richieste passano attraverso il Cloudflare Worker (https://api.graphxpert.eu) che inoltra le chiamate al backend su Render:
+
+- API Gateway: https://api.graphxpert.eu  
+- Backend origin: https://list-check-backend.onrender.com/compare  
+- Endpoint principale: POST /compare  
+- Repository backend: https://github.com/GraphXpert/list-check-backend
+
 
 
 **Input:**
