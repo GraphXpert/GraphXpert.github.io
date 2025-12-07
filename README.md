@@ -309,7 +309,7 @@ Per problemi o richieste:
 - [Repository Backend: assembly-excel-edit-backend](https://github.com/GraphXpert/assembly-excel-edit-backend)
 - [Repository Backend: list-check-electron-backend](https://github.com/GraphXpert/list-check-electron-backend)
 - [Repository Backend: list-check-backend](https://github.com/GraphXpert/list-check-backend)
-
+* Documentazione: List Check – Cloudflare Worker API Gateway (docs/list-check-api-gateway.md)
 ---
 
 **GraphXpert** - Suite di applicazioni web per l'analisi e gestione di file Excel e PDF
