@@ -279,6 +279,10 @@ Per dettagli aggiuntivi sul comportamento del Worker vedere `docs/list-check-api
 - Il backend di List Check non è esposto direttamente: il browser chiama solo `https://api.graphxpert.eu`, che è un Cloudflare Worker che inoltra le richieste a `https://list-check-backend.onrender.com/compare`.
 - I backend su Render.com non salvano in modo persistente i file caricati: gli Excel vengono elaborati in memoria e i risultati restituiti direttamente al client.
 - CORS sui backend sono configurati per accettare richieste dai domini GraphXpert (es. `https://graphxpert.eu`).
+- Tutte le applicazioni interne (Assembly Check, Assembly Excel Edit, List Check) sono protette da Cloudflare Access.
+- La homepage principale https://graphxpert.eu è pubblica, ma l’accesso alle applicazioni avviene solo dopo autenticazione tramite Cloudflare.
+- Cloudflare Access controlla gli utenti autorizzati tramite regole configurate nella dashboard Zero Trust.
+
 
 ---
 
